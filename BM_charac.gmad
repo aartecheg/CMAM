@@ -1,0 +1,38 @@
+d1: drift, l=0.983*m, horizontalWidth=1*m, aper1=40*cm;
+d2: drift, l=0.612*m, horizontalWidth=1*m, aper1=40*cm;
+d3: drift, l=0.810*m, horizontalWidth=1*m, aper1=40*cm;
+d3_segment: drift, l=0.810*m/10.0, horizontalWidth=1*m, aper1=40*cm;
+d_probe: drift, l=0.05*m, horizontalWidth=1*m, aper1=40*cm;
+quadrupole_separation: drift, l=0.044*m, horizontalWidth=1*m, aper1=40*cm;
+q1: quadrupole, l=0.207*m,k1=1, horizontalWidth=1*m, aper1=25.4*mm; 
+q2: quadrupole, l=0.382*m,k1=-1.2, horizontalWidth=1*m, aper1=25.4*mm;
+sb: sbend,l=1.063*m, angle=0.261799*rad, e2=0.1309*rad, horizontalWidth=1*m, aper1=40*cm;
+rf1: rf, l=3.505*m, E=2*MV, frequency=0*MHz, phase=0, tOffset=0*ns, horizontalWidth=1*m, aper1=40*cm;
+
+
+! by setting the aperture type to circular vacuum we get a drift
+! without any beam pipe - invisible by default - use --vis_debug to see it
+
+airCylinder: drift, l=3.505*m, apertureType="circularVacuum", vacuumMaterial="air", aper1=40*cm;
+airCylinder2: drift, l=50*cm, apertureType="circularVacuum", vacuumMaterial="air", aper1=40*cm;
+
+! by defining an rectangular collimator with no opening, we get a square block
+
+blueish: newcolour, red=0, green=128, blue=255, alpha=0.3;
+waterBlock: rcol, l=20*cm, material="water", colour="blueish";
+
+! similarly a recangular block of water but with a casing as provided by the beam pipe
+
+waterBox: drift, l=1*m, apertureType="rectangular", beampipeThickness=1*cm, aper1=20*cm, aper2=40*cm, vacuumMaterial="water";
+
+l1: line=(d1, sb, d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe);
+use, l1;
+
+beam, particle="proton",
+      energy=5*MeV+0.938272*GeV, distrType="gauss", sigmaX=2*mm, sigmaY=2*mm, sigmaXp=0.0*mrad, sigmaYp=0.0*mrad;
+
+option, physicsList="em_livermore",
+	elossHistoBinWidth=10*cm,
+	ngenerate=100;
+
+sample,all;

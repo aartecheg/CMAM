@@ -1,0 +1,27 @@
+d1: drift, l=0.983*m, horizontalWidth=1*m, aper1=40*cm;
+d2: drift, l=0.612*m, horizontalWidth=1*m, aper1=40*cm;
+d3: drift, l=0.810*m, horizontalWidth=1*m, aper1=40*cm;
+d3_segment: drift, l=0.810*m/10.0, horizontalWidth=1*m, aper1=40*cm;
+d_probe: drift, l=0.05*m, horizontalWidth=1*m, aper1=200*cm;
+quadrupole_separation: drift, l=0.044*m, horizontalWidth=1*m, aper1=40*cm;
+q1: quadrupole, l=0.207*m, k1=3.4, horizontalWidth=1*m, aper1=25.4*mm; 
+q2: quadrupole, l=0.382*m, k1=-3.7, horizontalWidth=1*m, aper1=25.4*mm;
+sb: sbend,l=1.063*m, angle=0.523599*rad, e2=0.261799*rad, scaling=1.415, horizontalWidth=1*m, aper1=40*cm;
+rf1: rf, l=3.505*m, E=1.0*MV, frequency=0*MHz, horizontalWidth=1*m, aper1=40*cm;
+
+
+! by setting the aperture type to circular vacuum we get a drift
+! without any beam pipe - invisible by default - use --vis_debug to see it
+
+
+l1: line=(d1, rf1, d2, q1, quadrupole_separation, q2, quadrupole_separation, q1, d3_segment, d3_segment,d3_segment,d3_segment,d3_segment,d3_segment,d3_segment,d3_segment,d3_segment,d3_segment, sb, d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe,d_probe);
+use, l1;
+
+beam, particle="proton",
+      energy=1*MeV+0.938272*GeV, distrType="gauss", sigmaX=2*mm, sigmaY=2*mm, sigmaXp=0.0*2.5*mrad, sigmaYp=0.0*2.5*mrad;
+
+option, physicsList="em_livermore",
+	elossHistoBinWidth=10*cm,
+	ngenerate=100;
+
+sample,all;
