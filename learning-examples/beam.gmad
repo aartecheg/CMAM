@@ -1,0 +1,10 @@
+beam, particle="e-",
+      kineticEnergy=50*MeV,
+      distrType="gauss",
+      sigmaX=1*mm,
+      sigmaXp=1.5e-3,
+      sigmaY=1*mm,
+      sigmaYp=1.5e-3;
+
+
+option, maximumStepLength=1*cm;

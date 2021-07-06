@@ -1,0 +1,7 @@
+strength = 10.0;
+
+include base.gmad;
+
+use, l1;
+
+include beam.gmad;

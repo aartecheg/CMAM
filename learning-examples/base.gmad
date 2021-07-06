@@ -1,0 +1,7 @@
+d1: drift, l=1*m;
+dspace: drift, l=0.2*m;
+tripA: quadrupole, l=0.2*m, k1=-0.8*strength;
+tripB: quadrupole, l=0.3*m, k1=strength;
+tripC: quadrupole, l=0.2*m, k1=-0.8*strength;
+
+l1: line=(d1, tripA, dspace, tripB, dspace, tripC, d1);

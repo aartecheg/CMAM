@@ -1,0 +1,13 @@
+strength = 10.0;
+
+include base.gmad;
+
+! here we update the strengths
+! as long as this is before the use command we're ok
+tripA: k1=-1.2*strength;
+tripB: k1=1.4*strength;
+tripC: k1=-1.2*strength;
+
+use, l1;
+
+include beam.gmad;
