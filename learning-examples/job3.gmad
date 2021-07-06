@@ -1,0 +1,12 @@
+strength = 10.0;
+
+include base.gmad;
+
+use, l1;
+
+include beam.gmad;
+
+beam, distrType="userfile",
+      distrFileFormat="x[mm]:xp[mrad]:y[mm]:yp[mrad]",
+      distrFile="principlerays.dat";
+      
