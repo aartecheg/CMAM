@@ -1,0 +1,7 @@
+The distances downstream the output face of the dipole are: 
+
+Aperture: 3.23 m
+
+Sample plane: 3.23 + 0.7 m
+
+The beams we would like to simulate are H+ at 2 and 1.5 MeV. This implies starting the simulation at half the energy, in the middle of our tank, and then include the acceleration for the other half of the energy in the simulation. I believe you have as a starting point the input files already prepared by Alberto, which include the accelerating tube, Qpole triplet and dipole.
