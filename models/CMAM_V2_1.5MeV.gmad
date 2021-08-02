@@ -1,0 +1,7 @@
+initialKineticEnergy = 0.75*MeV;
+electricField = 0.75*MV;
+
+quad1Voltage = 1900; !TBC
+quad2Voltage = 1900; !TBC
+
+include CMAM_V2_model.gmad;

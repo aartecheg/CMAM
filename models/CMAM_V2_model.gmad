@@ -1,0 +1,166 @@
+! contents
+! 0 general settings
+! 1 calculate strengths
+! 2 define beam line elements
+! 3 define sequence / line
+! 4 define beam
+! 5 define general options
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! GENERAL SETTINGS        !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!initialKineticEnergy = 1*MeV;
+!electricField = 1*MV;
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! CALCULATIONS            !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+topKineticEnergy = initialKineticEnergy + (electricField / MV)*MeV;
+print, topKineticEnergy;
+
+! calculations for the quadrupole strength
+! input voltage
+inputVA = 1900;
+inputVB = 1900;
+chargeState = 2;
+beamKineticEnergy = 6*MeV;  !copied from excel for this calculation only TBC
+
+quadrupoleRadius = 2.54*cm;
+! in comparison to the formula in excel, we use MeV units above as the
+! units in BDSIM are GeV by default - therefore the extra factor of 10^3
+qkA = sqrt( inputVA * chargeState / (beamKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
+print, qkA;
+qkB = sqrt( inputVB * chargeState / (beamKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
+print, qkB;
+
+! let's define some default parameters for the geometry
+option, horizontalWidth = 1*m,
+	aper1 = 10*cm;
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! BEAMLINE ELEMENTS       !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! now we define the beam line elements / objects
+d1: drift, l=0.983*m;
+rf1: rf, l=3.505*m, E=electricField, frequency=0*MHz;
+d2: drift, l=0.612*m;
+quadrupole_separation: drift, l=0.044*m;
+q1: quadrupole, l=0.207*m, k1=3.4, aper1=25.4*mm;
+! TBC - this is how we would use the calculated variable for the strength
+!q1: quadrupole, l=0.207*m, k1=qkA, aper1=25.4*mm;
+q2: quadrupole, l=0.382*m, k1=-3.7, aper1=25.4*mm;
+nSplitD3 = 5;
+d3_segment: drift, l=0.810*m/nSplitD3;
+
+! as the kinetic energy is greater we need to calculate a scaling for the
+! the dipole as compared to the 'nominal' beam energy at the start
+! the linear scaling factor for a dipole should scale linearly with the
+! momentum of the particle
+protonMass = 0.938272013; ! GeV
+nominalMomentum = sqrt( (protonMass+initialKineticEnergy)^2 - (protonMass^2) );
+print, nominalMomentum;
+acceleratedMomentum = sqrt( (protonMass+topKineticEnergy)^2 - (protonMass^2) );
+print, acceleratedMomentum;
+scalingFactor = acceleratedMomentum / nominalMomentum;
+print, scalingFactor;
+sb: sbend,l=1.063*m, angle=0.523599*rad, e2=0.261799*rad, scaling=scalingFactor;
+
+! as only 'see' the beam distribution at a plane after a beam line element, rather
+! than define one drift, we split it into a few pieces so we can see the beam evolution
+distanceToAperture = 3.23*m;
+nSplitDrift4 = 10;
+lD4Segment = distanceToAperture/nSplitDrift4;
+d4_segment: drift, l=lD4Segment;
+
+! we want to define an aperture or collimator that is diamond shaped
+! we can get this roughly with a square aperture that is tilted 45 degress
+colHalfAperture = 5*cm;
+lengthCollimator = 1*cm;
+collimator: rcol, l=lengthCollimator, material="stainlesssteel", xsize=colHalfAperture, ysize=colHalfAperture, tilt=45*degrees, horizontalWidth=30*cm;
+
+! want a sample plane for a detector specifically 0.7m after the collimator
+distanceToDetector = 0.7*m - lengthCollimator;
+d5: drift, l=lD4Segment;
+detector: drift, l=distanceToDetector-lD4Segment;
+! the 'detector' here is a drift beam pipe but the sample plane will be after it
+! so I'm just calling the drift 'detector'
+
+! there's a bug just now where the sampler just before a dump doesn't record
+! work around just now is to add a very small gap
+dg: gap, l=10*um;
+! we create a dump to absorb all particles - this can make the simulation
+! faster because we don't simulate the interaction with air after the beam pipe
+du: dump, l=10*cm, horizontalWidth=40*cm;
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! BEAMLINE                !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! define a sequence or line of the beam line elements
+l1: line=(d1, rf1, d2, q1, quadrupole_separation, q2, quadrupole_separation, q1, 5*d3_segment, sb);
+l2: line=(10*d4_segment, collimator, d5, detector);
+l3: line=(10*d4_segment);
+ldump: line=(dg, du);
+completeMachine: line=(l1, l2, l3, ldump);
+
+! select which line to build
+use, completeMachine;
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! BEAM                    !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! define a beam of particles
+! this definition also defines the nominal beam so that magnetic fields
+! can be calculated from normalised strengths such as k1 or a dipole angle
+beam, particle="proton",
+      kineticEnergy=initialKineticEnergy;
+
+! we can also define a beam distribution. The default is a 'reference' beam
+! where all the coordinates are 0 and the same coordinates are used for every
+! initial primary particle fired / simulated.
+beam, distrType="gauss",
+      sigmaX=2*mm,
+      sigmaY=2*mm,
+      sigmaXp=2*mm*2.5*mrad,
+      sigmaYp=2*mm*2.5*mrad;
+! TBC - no range of angles is a little suspicious
+! technically this gives us 0 emittance
+! I've changed it from 0 * 2.5mrad to 2*mm * 2*mrad
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! OPTIONS                 !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! by default, there is no physics - we should choose the relevant physics
+! here we choose electromagnetic physics and the livermore version which
+! is good for low energy applications
+! just 'em' is quicker and enough to stop particles for a basic beam line study
+option, physicsList="em";
+!option, physicsList="em_livermore";
+
+! bdsim by default makes a histogram of beam losses and energy deposition
+! along the axis of the accelerator. This histogram has a default bin width
+! of 0.5m, which in this case is a bit big. We reduce it to see in more detail.
+option,	elossHistoBinWidth=10*cm;
+
+! we can optionally stop any secondary particles if we only care about where the
+! 'primary' protons go - uncomment if required
+!option, stopSecondaries=1;
+
+! we set a default number of particles to generate - the --ngenerate executable
+! option will always override this.
+option,	ngenerate=10;
+
+! some output file options
+option, storeSamplerKineticEnergy=1;
+
+! we tell bdsim to record the distribution of particles in a 'sample' plane
+! after all beam line elements
+sample,all;
+! we could sample just a single plane
+!sample, range=detector;
+
+! because we're really very low energy we sometimes trigger the threshold for
+! energy deposition in air which is then identified as 'scattering' and a hit
+! here, I raise this by 1000x so not to falsly trigger this. It's quite sensitive
+! by default so not to miss hits in thin things like wires in wirescanners
+option, dEThresholdForScattering=1e-8*GeV;
