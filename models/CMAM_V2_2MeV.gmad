@@ -1,7 +1,8 @@
 initialKineticEnergy = 1*MeV;
 electricField = 1*MV;
+chargeState = 1;
 
-quad1Voltage = 1900; !TBC
-quad2Voltage = 1900; !TBC
+quad1Voltage = 1900*V;
+quad2Voltage = 1900*V;
 
 include CMAM_V2_model.gmad;

@@ -11,6 +11,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !initialKineticEnergy = 1*MeV;
 !electricField = 1*MV;
+! these are now defined in a parent file that includes this one
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -23,15 +24,16 @@ print, topKineticEnergy;
 ! input voltage
 inputVA = 1900;
 inputVB = 1900;
-chargeState = 2;
-beamKineticEnergy = 6*MeV;  !copied from excel for this calculation only TBC
+!chargeState = 2;
+!beamKineticEnergy = 6*MeV;  !copied from excel for this calculation only TBC
 
 quadrupoleRadius = 2.54*cm;
 ! in comparison to the formula in excel, we use MeV units above as the
 ! units in BDSIM are GeV by default - therefore the extra factor of 10^3
-qkA = sqrt( inputVA * chargeState / (beamKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
+qkA = sqrt( quad1Voltage * chargeState / (topKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
 print, qkA;
-qkB = sqrt( inputVB * chargeState / (beamKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
+! opposite polarity - so minus in front
+qkB = -sqrt( quad2Voltage * chargeState / (topKineticEnergy * 1e9 * quadrupoleRadius * quadrupoleRadius) );
 print, qkB;
 
 ! let's define some default parameters for the geometry
@@ -46,10 +48,11 @@ d1: drift, l=0.983*m;
 rf1: rf, l=3.505*m, E=electricField, frequency=0*MHz;
 d2: drift, l=0.612*m;
 quadrupole_separation: drift, l=0.044*m;
-q1: quadrupole, l=0.207*m, k1=3.4, aper1=25.4*mm;
+!q1: quadrupole, l=0.207*m, k1=3.4, aper1=25.4*mm;
 ! TBC - this is how we would use the calculated variable for the strength
-!q1: quadrupole, l=0.207*m, k1=qkA, aper1=25.4*mm;
-q2: quadrupole, l=0.382*m, k1=-3.7, aper1=25.4*mm;
+q1: quadrupole, l=0.207*m, k1=qkA, aper1=25.4*mm;
+!q2: quadrupole, l=0.382*m, k1=-3.7, aper1=25.4*mm;
+q2: quadrupole, l=0.382*m, k1=qkB, aper1=25.4*mm;
 nSplitD3 = 5;
 d3_segment: drift, l=0.810*m/nSplitD3;
 
@@ -121,11 +124,10 @@ beam, particle="proton",
 beam, distrType="gauss",
       sigmaX=2*mm,
       sigmaY=2*mm,
-      sigmaXp=2*mm*2.5*mrad,
-      sigmaYp=2*mm*2.5*mrad;
+      sigmaXp=5e-5,
+      sigmaYp=5e-5;
 ! TBC - no range of angles is a little suspicious
 ! technically this gives us 0 emittance
-! I've changed it from 0 * 2.5mrad to 2*mm * 2*mrad
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! OPTIONS                 !!

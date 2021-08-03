@@ -1,5 +1,6 @@
 initialKineticEnergy = 1*MeV;
 electricField = 1*MV;
+chargeState = 1;
 
 quad1Voltage = __VOLTAGE1__;
 quad2Voltage = __VOLTAGE2__;
